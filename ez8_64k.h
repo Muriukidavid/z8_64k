@@ -1,5 +1,5 @@
-#ifndef z8_4k_XP
-#define z8_4k_XP
+#ifndef z8_64k
+#define z8_64k
 #include "generics.h"
 //ez8 4k XP defines 
 unsigned long int ez8_freq = 18432000; //the ez864K frequency
