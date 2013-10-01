@@ -3,6 +3,7 @@
 #include "ez8_64k.h"
 #include "defines.h"
 #include "delay.h"
+extern void config_lcd(void);
 //pin operation functions
 extern void SCK(void);
 extern void CLR_SCK(void);

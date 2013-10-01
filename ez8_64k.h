@@ -17,6 +17,7 @@ typedef struct{
 	PORT portA;
 	PORT portB;
 	PORT portC;
+	PORT portD;
 	PORT portE;
 	PORT portF;
 	PORT portG;
@@ -26,33 +27,18 @@ typedef struct{
 typedef struct {
 	volatile unsigned char 
 	cen:1,
-	refsell:1,
-	refext:1,
+	reserved:1,
+	vref:1,
 	cont:1,
 	anain:4;
-}ADCCTL0;
-	
-typedef struct {
-	volatile unsigned char
-	refselh:1,
-	almhst:1,
-	almlst:1,
-	almhen:1,
-	almlen:1,
-	bufmode2:1,
-	bufmode1:1,
-	bufmode0:1;
-}ADCCTL1;
+}ADCCTL;
 
 //adc
 typedef struct {
-	ADCCTL0 ctl0;
-	ADCCTL1 ctl1;	
+	ADCCTL control;
+	volatile REG reserved;	
 	volatile REG datah;	
-	volatile REG datal;	
-	volatile REG highthresh;	
-	volatile REG adc_reserved;	
-	volatile REG lowthresh;		
+	volatile REG datal;			
 }*ADC;
 
 //uart
@@ -76,6 +62,7 @@ typedef struct {
 	 mprx:1;
 }STATUS1;
 //uart control 0 register
+//TEN REN CTSE PEN PSEL SBRK STOP LBEN
 typedef struct {
 	volatile unsigned char	
 	ten:1,
@@ -87,12 +74,25 @@ typedef struct {
 	stopbits:1,
 	lben:1;
 }CONTROL0;
+//uart control 1 register
+//MPMD[1] MPEN MPMD[0] MPBT DEPOL BRGCTL RDAIRQ IREN
+typedef struct {
+	volatile unsigned char
+	mpmd1:1,
+	mpen:1,
+	mpmd0:1,
+	mpbt:1,
+	depol:1,
+	brgctl:1,
+	rdairq:1,
+	iren:1;
+}CONTROL1;
 
 typedef struct {
 	volatile REG data;// Tx and Rx point to same location => (char*) 0x00;
 	STATUS0 status0;	
 	CONTROL0 control0;
-	volatile REG control1; 	
+	CONTROL1 control1; 	
 	STATUS1 status1;
 	volatile REG addr_cmp;
 	volatile REG baudh;
@@ -219,88 +219,170 @@ typedef struct {
 //end dma
 
 //dma_adc
+//DMAA_CTL: DAEN IRQEN Reserved[1:0] ADC_IN[3:0]
+typedef struct {
+	volatile unsigned char
+	daen:1,
+	irqen:1,
+	reserved:2,
+	adcin:4;//1011 channel 0 to 11 updated
+}DMAA_CTL;
+
+//DMA_ADC Status Register (DMAA_STAT)
+//CADC[3:0] Reserved IRQA IRQ1 IRQ0
+typedef struct {
+	volatile unsigned char
+	cadc:4,
+	reserved:1,
+	irqa:1,
+	irq1:1,
+	irq0:1;
+}DMAA_STAT;
+
 typedef struct {
 	volatile REG addr;
-	volatile REG control;
-	volatile REG status;
+	DMAA_CTL control;
+	DMAA_STAT status;
 }*DMA_ADC;
 //end dma_adc
 
 //irq
-//irq enable high register
+//irq0 enable high register
+//T2ENH T1ENH T0ENH U0RENH U0TENH I2CENH SPIENH ADCENH
 typedef struct {
 	volatile unsigned char 	
-	reserved:1,
+	t2enh:1,
 	t1enh:1,
 	t0enh:1,
 	u0renh:1,
 	u0tenh:1,
-	reserved2:2,
+	i2cenh:1,
+	spienh:1,
 	adcenh:1;
 }IRQ0ENH;
 
+//enable low register
+//T2ENL T1ENL T0ENL U0RENL U0TENL I2CENL SPIENL ADCENL
 typedef struct {
 	volatile unsigned char 
-	reserved:1,
+	t2enl:1,
 	t1enl:1,
 	t0enl:1,
 	u0renl:1,
 	u0tenl:1,
-	reserved2:2,
-	adcenl:1;			
+	i2cenl:1,
+	spienl:1,
+	adcenl:1;		
 }IRQ0ENL;
 
+//irq1 enable high register
+//PAD7ENH PAD6ENH PAD5ENH PAD4ENH PAD3ENH PAD2ENH PAD1ENH PAD0ENH
 typedef struct {
 	volatile unsigned char 
-	pa7venh:1,
-	pa6cenh:1,
-	pa5enh:1,
-	pa4enh:1,
+	pad7venh:1,
+	pad6cenh:1,
+	pad5enh:1,
+	pad4enh:1,
 	pad3enh:1,
 	pad2enh:1,
-	pa1enh:1,
-	pa0enh:1;			
+	pad1enh:1,
+	pad0enh:1;			
 }IRQ1ENH;
 
+//irq1 enable low register
+//PAD7ENL PAD6ENL PAD5ENL PAD4ENL PAD3ENL PAD2ENL PAD1ENL PAD0ENL
 typedef struct {
 	volatile unsigned char 
-	pa7venl:1,
-	pa6cenl:1,
-	pa5enl:1,
-	pa4enl:1,
-	pa3enl:1,
-	pa2enl:1,
-	pa1enl:1,
-	pa0enl:1;			
+	pad7venl:1,
+	pad6cenl:1,
+	pad5enl:1,
+	pad4enl:1,
+	pad3enl:1,
+	pad2enl:1,
+	pad1enl:1,
+	pad0enl:1;			
 }IRQ1ENL;
 
+//irq2 enable high register
+//T3ENH U1RENH U1TENH DMAENH C3ENH C2ENH C1ENH C0ENH
 typedef struct {
 	volatile unsigned char 
-	reserved:4,
+	t3enh:1,
+	u1renh:1,
+	u1tenh:1,
+	dmaenh:1,
 	c3enh:1,
 	c2enh:1,
 	c1enh:1,
-	c0enh:1;			
+	c0enh:1;
 }IRQ2ENH;
 
+//irq2 enable low register
+//T3ENL U1RENL U1TENL DMAENL C3ENL C2ENL C1ENL C0ENL
 typedef struct {
 	volatile unsigned char 
-	reserved:4,
+	t3enl:1,
+	u1renl:1,
+	u1tenl:1,
+	dmaenl:1,
 	c3enl:1,
 	c2enl:1,
 	c1enl:1,
 	c0enl:1;			
 }IRQ2ENL;
 
+//T2I T1I T0I U0RXI U0TXI I2CI SPII ADCI
+typedef struct {
+	volatile unsigned char 
+	t2i:1,
+	t1i:1,
+	t0i:1,
+	u0rxi:1,
+	u0txi:1,
+	i2ci:1,
+	spii:1,
+	adci:1;
+}IRQ0;
+
+//PAD7I PAD6I PAD5I PAD4I PAD3I PAD2I PAD1I PAD0I
+typedef struct {
+	volatile unsigned char 
+	pad7i:1,
+	pad6i:1,
+	pad5i:1,
+	pad4i:1,
+	pad3i:1,
+	pad2i:1,
+	pad1i:1,
+	pad0i:1;
+}IRQ1;
+
+//T3I U1RXI U1TXI DMAI PC3I PC2I PC1I PC0I
+typedef struct {
+	volatile unsigned char 
+	t3i:1,
+	u1rxi:1,
+	u1txi:1,
+	dmai:1,
+	pc3i:1,
+	pc2i:1,
+	pc1i:1,
+	pc0i:1;
+}IRQ2;
+
+typedef union {
+	IRQ2 irq2;
+	volatile REG irqtwo;
+}IRQ2E;
 //interrupt controller
 typedef struct {
-	volatile REG irq0;
+	IRQ0 irq0;
 	IRQ0ENH irq0enh;
 	IRQ0ENL irq0enl;
-	volatile REG irq1;
+	IRQ1 irq1;
 	IRQ1ENH irq1enh;
 	IRQ1ENL irq1enl;
-	volatile REG irq2;
+	IRQ2E irq2e;
 	IRQ2ENH irq2enh;
 	IRQ2ENL irq2enl;
 	volatile REG reserved0;
@@ -386,11 +468,13 @@ TIMER timer0;
 TIMER timer1;
 TIMER timer2;
 TIMER timer3;
-
+//timer holder
+TIMER timer;
 //uart
 UART uart0;
 UART uart1;
-
+//uart holder for switching
+UART uart;
 //i2c
 I2C i2c0;
 
@@ -403,7 +487,7 @@ ADC adc0;
 //dma
 DMA dma0;
 DMA dma1;
-DMA_ADC dma_adc;
+DMA_ADC dmaadc;
 
 INTERRUPT_CONTROLLER interrupt_c;
 

@@ -19,20 +19,20 @@ enum timer_modes {
 	capture_compare
 };
 	
-#define timer0_mode pwm_dual // only timer0 connected as PWM
+#define timer0_mode pwm_single //timer0 connected as PWM
 //requirements for PWM dual output
 #define prescale_value 0 //clock divided by 1(2^prescale_value)
 #define polarity 0 //low when timer disabled
 
 
 //#define timer1_mode pwm_single //timer1 not used
-TIMER selectedTimer;
 char currentTimer;
 char timerMode;
 unsigned long int TReload;
-void construct_timer(void);
+void construct_timer(char devnum);
+void switch_timer(char devnum);
 void init_timers(void);
-void init_timer(void);
+void init_timer(char devnum);
 //pwm stuff
 #define RELOAD (unsigned long int) 55296 //the pwm timer reload value
 unsigned long int pwm_data=00000000; //holder for read pwm value
@@ -49,3 +49,6 @@ void set_PWM(unsigned long int duty);
 void get_percent(void);
 void reduce_PWM(void);
 void increase_PWM(void);
+
+//external funstions
+extern void timer_config(void);

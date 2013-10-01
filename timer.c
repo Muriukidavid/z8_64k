@@ -1,99 +1,110 @@
 #include "timer.h"
 
-void construct_timer(void){
-	#ifdef timer0_ON
-		timer0=(TIMER)timer00;
-	#endif
-	#ifdef timer1_ON
-		timer1=(TIMER)timer01;
-	#endif
-}
-
 void init_timers(void){
 	#ifdef timer0_ON
-		selectedTimer = timer0;
-		currentTimer=0x00;
-		timerMode = timer0_mode;
-		init_timer();
+		construct_timer(0);
+		init_timer(0);
 	#endif
 	#ifdef timer1_ON
-		selectedTimer  = timer1;
-		currentTimer=0x01;
-		timerMode = timer1_mode;
-		init_timer();
+		construct_timer(1);
+		init_timer(1);
 	#endif
 }
 
-void init_timer(void){
-	selectedTimer->tctl1.ten = 0; //disable the timer
+void construct_timer(char devnum){
+	switch(devnum){
+		case 0:
+			timer0=(TIMER)timer00;
+		break;	
+		case 1:	
+			timer1=(TIMER)timer01;
+		break;
+	}
+}
+
+void switch_timer(char devnum){
+	switch(devnum){
+		case 0:
+			timer = timer0;
+		break;
+		case 1:
+			timer = timer1;
+		break;
+	}
+}
+
+void init_timer(char devnum){
+	timer_config(); // gpio ports configuration
+	switch_timer(devnum);
+	timer->tctl1.ten = 0; //disable the timer
 	//general timer settings
 	//#prescale value.
-	selectedTimer->tctl1.pres = prescale_value; //prescale value=0, clock divided by (2^0=1)
+	timer->tctl1.pres = prescale_value; //prescale value=0, clock divided by (2^0=1)
 	//#initial logic level 
-	selectedTimer->tctl1.tpol = 0; //set timer polarity output forced low when disabled, complement forced high
+	timer->tctl1.tpol = 0; //set timer polarity output forced low when disabled, complement forced high
 	//#Timer Output alternate function.
 	//the starting count value
-	selectedTimer->th.byte_reg=0x00;
-	selectedTimer->tl.byte_reg=0x01;
+	timer->th.byte_reg=0x00;
+	timer->tl.byte_reg=0x01;
 	//the reload value
-	selectedTimer->trh.byte_reg=0xD8;
-	selectedTimer->trl.byte_reg=0x00;
+	timer->trh.byte_reg=0xD8;
+	timer->trl.byte_reg=0x00;
 	//Configure the timer for PWM mode.
 	switch(timerMode){
 		case one_shot:
-			selectedTimer->tctl0.tmodehi=0;
-			selectedTimer->tctl1.tmode=0;
+			timer->tctl0.tmodehi=0;
+			timer->tctl1.tmode=0;
 		break;
 		case continuous:
-			selectedTimer->tctl0.tmodehi=0;
-			selectedTimer->tctl1.tmode=0x01;
+			timer->tctl0.tmodehi=0;
+			timer->tctl1.tmode=0x01;
 		break;
 		case counter:
-			selectedTimer->tctl0.tmodehi=0;
-			selectedTimer->tctl1.tmode=0x02;
+			timer->tctl0.tmodehi=0;
+			timer->tctl1.tmode=0x02;
 		break;
 		case comparator_counter:
-			selectedTimer->tctl0.tmodehi=1;
-			selectedTimer->tctl1.tmode=0x02;
+			timer->tctl0.tmodehi=1;
+			timer->tctl1.tmode=0x02;
 		break;
 		case pwm_single:
-			selectedTimer->tctl0.tmodehi=0;
-			selectedTimer->tctl1.tmode=0x03;
+			timer->tctl0.tmodehi=0;
+			timer->tctl1.tmode=0x03;
 			set_PWM(50);//initial 50% duty cycle
 		break;
 		case pwm_dual:
-			selectedTimer->tctl0.tmodehi=1;
-			selectedTimer->tctl1.tmode=0x00;
+			timer->tctl0.tmodehi=1;
+			timer->tctl1.tmode=0x00;
 			set_PWM(10);//initial 50% duty cycle
 		break;
 		case capture:
-			selectedTimer->tctl0.tmodehi=0;
-			selectedTimer->tctl1.tmode=0x04;
+			timer->tctl0.tmodehi=0;
+			timer->tctl1.tmode=0x04;
 		break;
 		case capture_restart:
-			selectedTimer->tctl0.tmodehi=1;
-			selectedTimer->tctl1.tmode=0x01;
+			timer->tctl0.tmodehi=1;
+			timer->tctl1.tmode=0x01;
 		break;
 		case compare:
-			selectedTimer->tctl0.tmodehi=0;
-			selectedTimer->tctl1.tmode=0x05;
+			timer->tctl0.tmodehi=0;
+			timer->tctl1.tmode=0x05;
 		break;
 		case gated:
-			selectedTimer->tctl0.tmodehi=0;
-			selectedTimer->tctl1.tmode=0x06;
+			timer->tctl0.tmodehi=0;
+			timer->tctl1.tmode=0x06;
 		break;
 		case capture_compare:
-			selectedTimer->tctl0.tmodehi=0;
-			selectedTimer->tctl1.tmode=0x07;
+			timer->tctl0.tmodehi=0;
+			timer->tctl1.tmode=0x07;
 		break;
 		default://pwm dual mode is the default mode if you pass mode>10
-			selectedTimer->tctl0.tmodehi=1;
-			selectedTimer->tctl1.tmode=0;
+			timer->tctl0.tmodehi=1;
+			timer->tctl1.tmode=0;
 		break;
 	}
 	//Configure the associated GPIO port pin for the Timer Output alternate function.
 	//Write to the Timer Control register to enable the timer and initiate counting.
-	selectedTimer->tctl1.ten=1;
+	timer->tctl1.ten=1;
 }
 
 /*******************

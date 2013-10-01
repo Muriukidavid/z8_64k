@@ -28,7 +28,7 @@
 //DMA
 #define dma00 			0xFB0
 #define dma01 			0xFB8
-#define dmaadc 			0xFBD
+#define dma_adc 			0xFBD
 
 //INTERRUPTS
 #define interrupts	 	0xFC0 
@@ -38,7 +38,7 @@
 #define porta 			0xFD0 //AF: timer0, uart0/ir, i2c
 #define portb 			0xFD4 //AF: ADC(ANA0:ANA7)
 #define portc 			0xFD8 //AF: timer1, SPI, Timer2
-#define portd 			0xFDC //AF: timer3, uart1, Watch-Dog Timer RC Oscillator Output
+#define portd 			0xFDC//AF: timer3, uart1, Watch-Dog Timer RC Oscillator Output
 #define porte 			0xFE0 //no alternate functions
 #define portf 			0xFE4 //no alternate functions
 #define portg 			0xFE8 //no alternate functions -> LCD(g0:g4)
@@ -55,6 +55,4 @@
 
 //CPU
 #define ez8cpu			0xFFC
-
-//#define trim_bit_c0		0xFF6
 #endif 

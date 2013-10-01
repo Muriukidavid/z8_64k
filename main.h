@@ -6,32 +6,24 @@
 #include "gpio.h"
 #include "adc.h"
 #include "lcd.h"
-//#include "memory.h"
-//#include "watchdog.h"
-//#include "power.h"
-#include "timer.h"
+#include "buttons.h"
+//#include "timer.h"
 
-//local variables
-//adc
-volatile unsigned int ADC_compensated;
-//char data_available=0;
-//uart
-
+//unsigned int RAM_location;
+unsigned char data_available = 0x00;
+unsigned int far store_adc_value[12];
+//enumerate inputs
+enum adc_inputs {ana0=0,ana1,ana2, ana3,ana4,ana5,ana6,ana7,ana8,ana9,ana10,ana11};
 /******** functions **********/
 void construct_system();
 void init_system();
-//application layer
-//void callibrate(char addr);
-//void diagnose(char addr);
-//void get_data(char addr);
+void show_bootup(void);
+void screen_layout(void);
 void display(void);
-//transport layer
-//char count_bytes(char *buffer);
-//char checksum(char *buffer);
-//void package(char *buffer);
-//void init_meter(void);//addresses for slaves 
-//void init_buffers(void);
-//char get_bufferlen(char *buffer);
-//extern char read(void);
-//extern void send(char data);
+void get_temperature1(void);
+void get_temperature2(void);
+void get_pressure(void);
+void get_light(void);
+void get_soilwetness(void);
+void get_humidity(void);
 #endif 
